@@ -13,5 +13,15 @@ CHIP HalfAdder {
         carry;  // Left bit of a + b
 
     PARTS:
-    // Put you code here:
+    // get carry bit
+    And (a=a, b=b, out=bothone);
+
+    // get sum bit
+    Or (a=a, b=b, out=anyone);
+    Not (in=anyone, out=bothzero);
+    Or (a=bothone, b=bothzero, out=carryzero);
+    Not (in=carryzero, out=sum);
+
+    // output carry bit
+    Or (a=bothone, b=bothone, out=carry);
 }
