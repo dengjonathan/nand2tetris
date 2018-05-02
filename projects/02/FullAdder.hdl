@@ -17,5 +17,5 @@ CHIP FullAdder {
     HalfAdder (a=firstsum, b=c, sum=sum, carry=secondcarry);
     
     // add the carrys
-    HalfAdder (a=firstcarry, b=secondcarry, sum=carry, carry=discard);
+    Or (a=firstcarry, b=secondcarry, out=carry);
 }
