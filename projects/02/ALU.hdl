@@ -42,9 +42,31 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-    // zero the x input
-    Not (in=zx, out=notzx);
-    Not16 (in=x, out=notx)
-    // inefficient but flips x if the selector zx == 1
-    Mux16 (a=x, sel=notzx, b=notx, out=out);
+    // set to 0 if selector is zx is on
+    Mux16 (a=x, sel=zx, b=false, out=appliedzx);
+
+    // zero the y input?
+    Mux16 (a=y, sel=zy, b=false, out=appliedzy);
+
+    // flip the bits
+    Not16 (in=appliedzx, out=notx);
+    Mux16(a=appliedzx, b=notx, sel=nx, out=appliednx);
+    Not16 (in=appliedzy, out=noty);
+    Mux16(a=appliedzy, b=noty, sel=ny, out=appliedny);
+
+    // aggregate
+    Add16(a=appliednx, b=appliedny, out=xplusy);
+    And16(a=appliednx, b=appliedny, out=xandy);
+    Mux16(b=xplusy, a=xandy, sel=f, out=aggregate);
+
+    // no
+    Not16 (in=aggregate, out=notaggregate);
+    // if leading zero is 1, then the sum is negative, else positive
+    Mux16 (a=aggregate, b=notaggregate, sel=no, out=out, out[0..7]=firsthalf, out[8..15]=secondhalf, out[15]=ng);
+
+    // is it zero?
+    Or8Way (in=firsthalf, out=isnotzerofirsthalf);
+    Or8Way (in=secondhalf, out=isnotzerosecondhalf);
+    Or (a=isnotzerofirsthalf, b=isnotzerosecondhalf, out=isnotzero);
+    Not(in=isnotzero, out=zr);
 }
